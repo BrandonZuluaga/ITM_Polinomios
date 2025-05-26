@@ -87,25 +87,32 @@ public class ServicioPolinomio {
         Polinomio cociente = new Polinomio();
         Polinomio resto = copiarPolinomio(dividendo);
 
-        while (resto.getCabeza() != null &&
-                resto.getCabeza().getExponente() >= divisor.getCabeza().getExponente()) {
+        Nodo cabezaDivisor = divisor.getCabeza();
 
-            int nuevoExponente = resto.getCabeza().getExponente() - divisor.getCabeza().getExponente();
-            double nuevoCoeficiente = resto.getCabeza().getCoeficiente() / divisor.getCabeza().getCoeficiente();
+        while (resto.getCabeza() != null && resto.getCabeza().getExponente() >= cabezaDivisor.getExponente()) {
+            Nodo cabezaResto = resto.getCabeza();
 
-            Nodo terminoCociente = new Nodo(nuevoExponente, nuevoCoeficiente);
+            int exponente = cabezaResto.getExponente() - cabezaDivisor.getExponente();
+            double coeficiente = cabezaResto.getCoeficiente() / cabezaDivisor.getCoeficiente();
+
+            Nodo terminoCociente = new Nodo(exponente, coeficiente);
             cociente.agregar(terminoCociente);
 
-            Polinomio temp = new Polinomio();
-            temp.agregar(terminoCociente);
+            Nodo nodoDivisor = cabezaDivisor;
+            while (nodoDivisor != null) {
+                int nuevoExponente = nodoDivisor.getExponente() + exponente;
+                double nuevoCoeficiente = nodoDivisor.getCoeficiente() * coeficiente;
+                // Restar término directamente al resto
+                resto.agregar(new Nodo(nuevoExponente, -nuevoCoeficiente));
+                nodoDivisor = nodoDivisor.siguiente;
+            }
 
-            Polinomio producto = multiplicar(divisor, temp);
-            resto = restar(resto, producto);
+            // Eliminar términos con coeficiente 0 para acelerar próximas iteraciones
+            resto = limpiarCeros(resto);
         }
 
         return cociente;
     }
-
 
     public static Polinomio derivada(Polinomio p) {
         Polinomio derivada = new Polinomio();
@@ -130,4 +137,17 @@ public class ServicioPolinomio {
         }
         return copia;
     }
+
+    private static Polinomio limpiarCeros(Polinomio p) {
+        Polinomio limpio = new Polinomio();
+        Nodo actual = p.getCabeza();
+        while (actual != null) {
+            if (Math.abs(actual.getCoeficiente()) > 1e-10) { // tolerancia para errores de coma flotante
+                limpio.agregar(new Nodo(actual.getExponente(), actual.getCoeficiente()));
+            }
+            actual = actual.siguiente;
+        }
+        return limpio;
+    }
+
 }
