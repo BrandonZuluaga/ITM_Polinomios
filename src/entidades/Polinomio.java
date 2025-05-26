@@ -10,6 +10,13 @@ public class Polinomio {
 
     private Nodo cabeza;
 
+    public int getGrado() {
+        if (cabeza == null) {
+            return -1;  // No hay términos en el polinomio
+        }
+        return cabeza.getExponente();
+    }
+
     public Polinomio() {
         cabeza = null;
     }
@@ -105,20 +112,6 @@ public class Polinomio {
         } else {
             lbl.setText("0");
         }
-    }
-
-    public Polinomio getDerivada() {
-        Polinomio derivada = new Polinomio();
-        var actual = cabeza;
-        while (actual != null) {
-            if (actual.getExponente() != 0) {
-                Nodo nodo = new Nodo(actual.getExponente() - 1, actual.getExponente() * actual.getCoeficiente());
-                derivada.agregar(nodo);
-            }
-            actual = actual.siguiente;
-        }
-
-        return derivada;
     }
 
     public List<Monomio> toDTO() {

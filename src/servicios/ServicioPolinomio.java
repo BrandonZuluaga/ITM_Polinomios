@@ -8,6 +8,7 @@ public class ServicioPolinomio {
     public static Polinomio sumar(Polinomio p1, Polinomio p2) {
         Polinomio pR = new Polinomio();
 
+
         Nodo actual1 = p1.getCabeza();
         Nodo actual2 = p2.getCabeza();
 
@@ -76,5 +77,57 @@ public class ServicioPolinomio {
             actual1 = actual1.siguiente;
         }
         return pR;
+    }
+
+    public static Polinomio dividir(Polinomio dividendo, Polinomio divisor) {
+        if (divisor.getCabeza() == null) {
+            throw new ArithmeticException("División por polinomio nulo");
+        }
+
+        Polinomio cociente = new Polinomio();
+        Polinomio resto = copiarPolinomio(dividendo);
+
+        while (resto.getCabeza() != null &&
+                resto.getCabeza().getExponente() >= divisor.getCabeza().getExponente()) {
+
+            int nuevoExponente = resto.getCabeza().getExponente() - divisor.getCabeza().getExponente();
+            double nuevoCoeficiente = resto.getCabeza().getCoeficiente() / divisor.getCabeza().getCoeficiente();
+
+            Nodo terminoCociente = new Nodo(nuevoExponente, nuevoCoeficiente);
+            cociente.agregar(terminoCociente);
+
+            Polinomio temp = new Polinomio();
+            temp.agregar(terminoCociente);
+
+            Polinomio producto = multiplicar(divisor, temp);
+            resto = restar(resto, producto);
+        }
+
+        return cociente;
+    }
+
+
+    public static Polinomio derivada(Polinomio p) {
+        Polinomio derivada = new Polinomio();
+        Nodo actual = p.getCabeza();
+        while (actual != null) {
+            if (actual.getExponente() > 0) {
+                double nuevoCoeficiente = actual.getCoeficiente() * actual.getExponente();
+                int nuevoExponente = actual.getExponente() - 1;
+                derivada.agregar(new Nodo(nuevoExponente, nuevoCoeficiente));
+            }
+            actual = actual.siguiente;
+        }
+        return derivada;
+    }
+
+    private static Polinomio copiarPolinomio(Polinomio p) {
+        Polinomio copia = new Polinomio();
+        Nodo actual = p.getCabeza();
+        while (actual != null) {
+            copia.agregar(new Nodo(actual.getExponente(), actual.getCoeficiente()));
+            actual = actual.siguiente;
+        }
+        return copia;
     }
 }
