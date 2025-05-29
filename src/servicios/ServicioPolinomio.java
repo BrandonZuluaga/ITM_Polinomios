@@ -96,6 +96,7 @@ public class ServicioPolinomio {
             Nodo mayorDivisor = divisor.obtenerMayor();
 
             int nuevoExponente = mayorResto.getExponente() - mayorDivisor.getExponente();
+            if (nuevoExponente < 0) break;
             double nuevoCoeficiente = mayorResto.getCoeficiente() / mayorDivisor.getCoeficiente();
 
             Nodo nuevoTermino = new Nodo(nuevoExponente, nuevoCoeficiente);
