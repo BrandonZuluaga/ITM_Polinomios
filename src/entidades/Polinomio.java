@@ -10,11 +10,53 @@ public class Polinomio {
 
     private Nodo cabeza;
 
-    public int getGrado() {
-        if (cabeza == null) {
-            return -1;  // No hay términos en el polinomio
+    public static Polinomio multiplicarTermino(Polinomio p, Nodo termino) {
+        Polinomio resultado = new Polinomio();
+        Nodo actual = p.getCabeza();
+
+        while (actual != null) {
+            int nuevoExponente = actual.getExponente() + termino.getExponente();
+            double nuevoCoeficiente = actual.getCoeficiente() * termino.getCoeficiente();
+            if (nuevoCoeficiente != 0) {
+                resultado.agregar(new Nodo(nuevoExponente, nuevoCoeficiente));
+            }
+            actual = actual.siguiente;
         }
-        return cabeza.getExponente();
+
+        return resultado;
+    }
+
+
+    public Polinomio copiar() {
+        Polinomio copia = new Polinomio();
+        Nodo actual = this.cabeza;
+
+        while (actual != null) {
+            copia.agregar(new Nodo(actual.getExponente(), actual.getCoeficiente()));
+            actual = actual.getSiguiente();
+        }
+
+        return copia;
+    }
+
+    public Nodo obtenerMayor() {
+        Nodo actual = cabeza;
+        Nodo mayor = cabeza;
+        while (actual != null) {
+            if (actual.getExponente() > mayor.getExponente()) {
+                mayor = actual;
+            }
+            actual = actual.getSiguiente();
+        }
+        return mayor;
+    }
+
+    public boolean esCero() {
+        return cabeza == null;
+    }
+
+    public int grado() {
+        return cabeza != null ? cabeza.getExponente() : -1;
     }
 
     public Polinomio() {
@@ -130,5 +172,4 @@ public class Polinomio {
             agregar(new Nodo(monomio.getExponente(), monomio.getCoeficiente()));
         }
     }
-
 }

@@ -3,6 +3,8 @@ package servicios;
 import entidades.Nodo;
 import entidades.Polinomio;
 
+import static entidades.Polinomio.multiplicarTermino;
+
 public class ServicioPolinomio {
 
     public static Polinomio sumar(Polinomio p1, Polinomio p2) {
@@ -80,74 +82,47 @@ public class ServicioPolinomio {
     }
 
     public static Polinomio dividir(Polinomio dividendo, Polinomio divisor) {
-        if (divisor.getCabeza() == null) {
-            throw new ArithmeticException("División por polinomio nulo");
+        if (divisor.esCero()) {
+            throw new ArithmeticException("No se puede dividir entre cero.");
         }
 
         Polinomio cociente = new Polinomio();
-        Polinomio resto = copiarPolinomio(dividendo);
+        Polinomio resto = dividendo.copiar();
 
-        Nodo cabezaDivisor = divisor.getCabeza();
+        while (!resto.esCero() && resto.grado() >= divisor.grado()) {
+            System.out.println("Resto actual: " + resto);
 
-        while (resto.getCabeza() != null && resto.getCabeza().getExponente() >= cabezaDivisor.getExponente()) {
-            Nodo cabezaResto = resto.getCabeza();
+            Nodo mayorResto = resto.obtenerMayor();
+            Nodo mayorDivisor = divisor.obtenerMayor();
 
-            int exponente = cabezaResto.getExponente() - cabezaDivisor.getExponente();
-            double coeficiente = cabezaResto.getCoeficiente() / cabezaDivisor.getCoeficiente();
+            int nuevoExponente = mayorResto.getExponente() - mayorDivisor.getExponente();
+            double nuevoCoeficiente = mayorResto.getCoeficiente() / mayorDivisor.getCoeficiente();
 
-            Nodo terminoCociente = new Nodo(exponente, coeficiente);
-            cociente.agregar(terminoCociente);
+            Nodo nuevoTermino = new Nodo(nuevoExponente, nuevoCoeficiente);
+            System.out.println("Nuevo término del cociente: " + nuevoTermino);
 
-            Nodo nodoDivisor = cabezaDivisor;
-            while (nodoDivisor != null) {
-                int nuevoExponente = nodoDivisor.getExponente() + exponente;
-                double nuevoCoeficiente = nodoDivisor.getCoeficiente() * coeficiente;
-                // Restar término directamente al resto
-                resto.agregar(new Nodo(nuevoExponente, -nuevoCoeficiente));
-                nodoDivisor = nodoDivisor.siguiente;
-            }
+            cociente.agregar(nuevoTermino);
 
-            // Eliminar términos con coeficiente 0 para acelerar próximas iteraciones
-            resto = limpiarCeros(resto);
+            Polinomio producto = multiplicarTermino(divisor, nuevoTermino);
+            System.out.println("Producto del divisor con el nuevo término: " + producto);
+
+            resto = restar(resto, producto);
         }
 
         return cociente;
     }
 
     public static Polinomio derivada(Polinomio p) {
-        Polinomio derivada = new Polinomio();
-        Nodo actual = p.getCabeza();
-        while (actual != null) {
+        Polinomio resultado = new Polinomio();
+        for (Nodo actual = p.getCabeza(); actual != null; actual = actual.siguiente) {
             if (actual.getExponente() > 0) {
-                double nuevoCoeficiente = actual.getCoeficiente() * actual.getExponente();
-                int nuevoExponente = actual.getExponente() - 1;
-                derivada.agregar(new Nodo(nuevoExponente, nuevoCoeficiente));
+                double nuevoCoef = actual.getCoeficiente() * actual.getExponente();
+                int nuevoExpo = actual.getExponente() - 1;
+                if (nuevoCoef != 0) {
+                    resultado.agregar(new Nodo(nuevoExpo, nuevoCoef));
+                }
             }
-            actual = actual.siguiente;
         }
-        return derivada;
+        return resultado;
     }
-
-    private static Polinomio copiarPolinomio(Polinomio p) {
-        Polinomio copia = new Polinomio();
-        Nodo actual = p.getCabeza();
-        while (actual != null) {
-            copia.agregar(new Nodo(actual.getExponente(), actual.getCoeficiente()));
-            actual = actual.siguiente;
-        }
-        return copia;
-    }
-
-    private static Polinomio limpiarCeros(Polinomio p) {
-        Polinomio limpio = new Polinomio();
-        Nodo actual = p.getCabeza();
-        while (actual != null) {
-            if (Math.abs(actual.getCoeficiente()) > 1e-10) { // tolerancia para errores de coma flotante
-                limpio.agregar(new Nodo(actual.getExponente(), actual.getCoeficiente()));
-            }
-            actual = actual.siguiente;
-        }
-        return limpio;
-    }
-
 }
